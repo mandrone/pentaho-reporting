@@ -18,12 +18,16 @@
 
 package org.pentaho.reporting.libraries.base.boot;
 
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+
 import org.pentaho.reporting.libraries.base.config.Configuration;
 import org.pentaho.reporting.libraries.base.util.ObjectUtilities;
 
 public class DefaultObjectFactory implements ObjectFactory
 {
   private Configuration configuration;
+  private HashMap<String, Object> singletons;
 
   public DefaultObjectFactory(final Configuration configuration)
   {
@@ -35,13 +39,38 @@ public class DefaultObjectFactory implements ObjectFactory
     return get(interfaceClass, interfaceClass.getName());
   }
 
-  public <T> T get(final Class<T> interfaceClass, final String key)
+  public synchronized <T> T get(final Class<T> interfaceClass, final String key)
   {
     final String value = configuration.getConfigProperty(key);
     if (value == null)
     {
       return null;
     }
-    return ObjectUtilities.loadAndInstantiate(value, interfaceClass, interfaceClass);
+
+    try
+    {
+      final ClassLoader classLoader = ObjectUtilities.getClassLoader(interfaceClass);
+      final Class clazz = (Class) Class.forName(value, false, classLoader);
+      final Annotation annotation = clazz.getAnnotation(SingletonHint.class);
+      if (annotation == null)
+      {
+        return ObjectUtilities.loadAndInstantiate(value, interfaceClass, interfaceClass);
+      }
+
+      final Object o = singletons.get(value);
+      if (o != null)
+      {
+        return (T) o;
+      }
+
+      final T retval = ObjectUtilities.loadAndInstantiate(value, interfaceClass, interfaceClass);
+      singletons.put(value, retval);
+      return retval;
+    }
+    catch (ClassNotFoundException e)
+    {
+      throw new IllegalStateException();
+    }
+
   }
 }
