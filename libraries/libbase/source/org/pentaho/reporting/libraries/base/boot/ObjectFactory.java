@@ -27,7 +27,8 @@ public interface ObjectFactory
    *
    * @param interfaceClass the type of object to retrieve (retrieved object will be
    *                       returned as this type)
-   * @return the implementation object typed to interfaceClass or null if undefined
+   * @return the implementation object typed to interfaceClass, never null.
+   * @throws ObjectFactoryException if the object is undefined.
    */
   public <T> T get(Class<T> interfaceClass);
 
@@ -38,7 +39,8 @@ public interface ObjectFactory
    * @param interfaceClass the type of object to retrieve (retrieved object will be
    *                       returned as this type)
    * @param key            the object identifier, typically the interface name
-   * @return the implementation object typed to interfaceClass or null if undefined
+   * @return the implementation object typed to interfaceClass, never null.
+   * @throws ObjectFactoryException if the object is undefined.
    */
   public <T> T get(Class<T> interfaceClass, String key);
 }

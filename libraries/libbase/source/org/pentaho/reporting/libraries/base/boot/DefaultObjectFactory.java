@@ -32,6 +32,7 @@ public class DefaultObjectFactory implements ObjectFactory
   public DefaultObjectFactory(final Configuration configuration)
   {
     this.configuration = configuration;
+    this.singletons = new HashMap<String, Object>();
   }
 
   public <T> T get(final Class<T> interfaceClass)
@@ -44,7 +45,7 @@ public class DefaultObjectFactory implements ObjectFactory
     final String value = configuration.getConfigProperty(key);
     if (value == null)
     {
-      return null;
+      throw new ObjectFactoryException(interfaceClass.getName(), value);
     }
 
     try
@@ -54,7 +55,12 @@ public class DefaultObjectFactory implements ObjectFactory
       final Annotation annotation = clazz.getAnnotation(SingletonHint.class);
       if (annotation == null)
       {
-        return ObjectUtilities.loadAndInstantiate(value, interfaceClass, interfaceClass);
+        final T retval = ObjectUtilities.loadAndInstantiate(value, interfaceClass, interfaceClass);
+        if (retval == null)
+        {
+          throw new ObjectFactoryException(interfaceClass.getName(), value);
+        }
+        return retval;
       }
 
       final Object o = singletons.get(value);
@@ -64,12 +70,16 @@ public class DefaultObjectFactory implements ObjectFactory
       }
 
       final T retval = ObjectUtilities.loadAndInstantiate(value, interfaceClass, interfaceClass);
+      if (retval == null)
+      {
+        throw new ObjectFactoryException(interfaceClass.getName(), value);
+      }
       singletons.put(value, retval);
       return retval;
     }
     catch (ClassNotFoundException e)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(e);
     }
 
   }
