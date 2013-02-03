@@ -20,31 +20,18 @@ package org.pentaho.reporting.engine.classic.core.modules.misc.datafactory.sql;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
-import org.pentaho.reporting.libraries.base.config.Configuration;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DataSourceService;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DatasourceServiceException;
 import org.pentaho.reporting.libraries.base.util.StringUtils;
 
 public class JndiConnectionProvider implements ConnectionProvider
 {
-  private static InitialContext initialContext;
-  private static final String JNDI_PREFIX_CONFIGURATION = "org.pentaho.reporting.engine.classic.core.modules.misc.datafactory.jndi-prefix.";
-
-  protected static synchronized InitialContext getInitialContext() throws NamingException
-  {
-    if (initialContext == null)
-    {
-      initialContext = new InitialContext();
-    }
-    return initialContext;
-  }
+  private DataSourceService dataSourceService;
 
   private static final Log logger = LogFactory.getLog(JndiConnectionProvider.class);
   private String connectionPath;
@@ -53,6 +40,7 @@ public class JndiConnectionProvider implements ConnectionProvider
 
   public JndiConnectionProvider()
   {
+    dataSourceService = ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceService.class);
   }
 
   public JndiConnectionProvider(final String connectionPath,
@@ -99,7 +87,7 @@ public class JndiConnectionProvider implements ConnectionProvider
    * the connection in a way so that calls to "close()" on that connection do not prevent subsequent calls to this
    * method to fail.
    *
-   * @param user the user name.
+   * @param user     the user name.
    * @param password the password.
    * @return the connection.
    * @throws SQLException if the connection has errors.
@@ -112,8 +100,7 @@ public class JndiConnectionProvider implements ConnectionProvider
     }
     try
     {
-      final Context ctx = getInitialContext();
-      final DataSource ds = findDataSource(ctx, connectionPath);
+      final DataSource ds = dataSourceService.getDataSource(connectionPath);
 
       final String realUser;
       final String realPassword;
@@ -151,52 +138,11 @@ public class JndiConnectionProvider implements ConnectionProvider
       }
       return connection;
     }
-    catch (NamingException ne)
+    catch (DatasourceServiceException ne)
     {
-      JndiConnectionProvider.logger.warn("Failed to access the JDNI-System", ne);
+      logger.warn("Failed to access the JDNI-System", ne);
       throw new SQLException("Failed to access the JNDI system");
     }
-  }
-
-  private DataSource findDataSource(final Context initialContext, final String connectionPath) throws SQLException
-  {
-    try
-    {
-      final Object o = initialContext.lookup(connectionPath);
-      if (o instanceof DataSource)
-      {
-        return (DataSource) o;
-      }
-    }
-    catch (NamingException e)
-    {
-      logger.trace("Failed to lookup JNDI name", e);
-      // ignored ..
-    }
-
-    final Configuration config = ClassicEngineBoot.getInstance().getGlobalConfig();
-    final Iterator keys = config.findPropertyKeys(JNDI_PREFIX_CONFIGURATION);
-    while (keys.hasNext())
-    {
-      final String key = (String) keys.next();
-      final String prefix = config.getConfigProperty(key);
-      try
-      {
-        final Object o = initialContext.lookup(prefix + connectionPath);
-        if (o instanceof DataSource)
-        {
-          return (DataSource) o;
-        }
-      }
-      catch (NamingException e)
-      {
-        logger.trace("Failed to lookup JNDI name", e);
-        // ignored ..
-      }
-    }
-
-    throw new SQLException("Failed to access the JNDI system: Cannot find the requested datasource '" +
-        connectionPath + "' anywhere in the JNDI system.");
   }
 
   public boolean equals(final Object o)

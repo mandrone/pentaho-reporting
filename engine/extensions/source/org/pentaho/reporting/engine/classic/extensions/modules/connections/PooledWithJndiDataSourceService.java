@@ -1,5 +1,23 @@
 package org.pentaho.reporting.engine.classic.extensions.modules.connections;
 
-public class PooledWithJndiDataSourceService
+import javax.sql.DataSource;
+
+import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.JndiDataSourceService;
+import org.pentaho.reporting.libraries.base.boot.ObjectFactory;
+
+public class PooledWithJndiDataSourceService extends PooledDataSourceService
 {
+  private JndiDataSourceService fallbackService;
+
+  public PooledWithJndiDataSourceService()
+  {
+    final ObjectFactory objectFactory = ClassicEngineBoot.getInstance().getObjectFactory();
+    fallbackService = objectFactory.get(JndiDataSourceService.class);
+  }
+
+  protected DataSource queryFallback(final String dataSource)
+  {
+    return fallbackService.getDataSource(dataSource);
+  }
 }

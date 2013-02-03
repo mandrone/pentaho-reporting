@@ -81,7 +81,8 @@ public interface DataSourceMgmtService
    * @throws DatasourceMgmtServiceException
    */
   public String updateDatasourceByName(String name,
-                                       IDatabaseConnection databaseConnection) throws NonExistingDatasourceException, DatasourceMgmtServiceException;
+                                       IDatabaseConnection databaseConnection)
+      throws NonExistingDatasourceException, DatasourceMgmtServiceException;
 
   /**
    * Updates a given JDBC datasource by id
@@ -93,5 +94,6 @@ public interface DataSourceMgmtService
    * @throws DatasourceMgmtServiceException
    */
   public String updateDatasourceById(String id,
-                                     IDatabaseConnection databaseConnection) throws NonExistingDatasourceException, DatasourceMgmtServiceException;
+                                     IDatabaseConnection databaseConnection)
+      throws NonExistingDatasourceException, DatasourceMgmtServiceException;
 }

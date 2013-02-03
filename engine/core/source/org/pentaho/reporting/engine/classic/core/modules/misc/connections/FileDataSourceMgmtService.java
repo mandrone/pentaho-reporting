@@ -17,9 +17,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.parser.DatabaseConnectionCollection;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.writer.DataSourceMgmtWriter;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.writer.FileDataSourceMgmtWriter;
 import org.pentaho.reporting.engine.classic.core.util.ConfigurationPropertyLookupParser;
-import org.pentaho.reporting.engine.classic.extensions.modules.connections.parser.DatabaseConnectionCollection;
-import org.pentaho.reporting.engine.classic.extensions.modules.connections.writer.FileDataSourceMgmtWriter;
 import org.pentaho.reporting.libraries.base.boot.SingletonHint;
 import org.pentaho.reporting.libraries.base.config.Configuration;
 import org.pentaho.reporting.libraries.resourceloader.Resource;
@@ -135,6 +136,7 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
 
   private String generateName()
   {
+    // todo: Maybe we can have a better strategy here later
     return UUID.randomUUID().toString();
   }
 
@@ -222,7 +224,8 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
   }
 
   public String updateDatasourceByName(final String name,
-                                       final IDatabaseConnection databaseConnection) throws NonExistingDatasourceException, DatasourceMgmtServiceException
+                                       final IDatabaseConnection databaseConnection)
+      throws NonExistingDatasourceException, DatasourceMgmtServiceException
   {
     load();
 
@@ -246,7 +249,8 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
   }
 
   public String updateDatasourceById(final String id,
-                                     final IDatabaseConnection databaseConnection) throws NonExistingDatasourceException, DatasourceMgmtServiceException
+                                     final IDatabaseConnection databaseConnection)
+      throws NonExistingDatasourceException, DatasourceMgmtServiceException
   {
     load();
 
@@ -331,7 +335,8 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
   {
     final List<IDatabaseConnection> datasources = getDatasources();
     final IDatabaseConnection[] connections = datasources.toArray(new IDatabaseConnection[datasources.size()]);
-    final FileDataSourceMgmtWriter writer = new FileDataSourceMgmtWriter();
+    final DataSourceMgmtWriter writer =
+        ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceMgmtWriter.class);
 
     try
     {

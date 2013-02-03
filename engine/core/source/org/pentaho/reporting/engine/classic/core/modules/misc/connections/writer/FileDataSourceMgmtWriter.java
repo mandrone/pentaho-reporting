@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.pentaho.database.model.IDatabaseConnection;
-import org.pentaho.reporting.engine.classic.extensions.modules.connections.ConnectionModule;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.ConnectionModule;
 import org.pentaho.reporting.libraries.base.util.StringUtils;
 import org.pentaho.reporting.libraries.xmlns.common.AttributeList;
 import org.pentaho.reporting.libraries.xmlns.writer.XmlWriter;
 
-public class FileDataSourceMgmtWriter
+public class FileDataSourceMgmtWriter implements DataSourceMgmtWriter
 {
   private static final String PROP_INDEX_TBS = "INDEX_TBS"; //$NON-NLS-1$
 
@@ -47,13 +47,18 @@ public class FileDataSourceMgmtWriter
   {
     final XmlWriter writer = new XmlWriter(new OutputStreamWriter(out, "UTF-8"));
     writer.writeXmlDeclaration("UTF-8");
-    writer.writeTag(ConnectionModule.NAMESPACE, "connections", XmlWriter.OPEN);
+
+    final AttributeList rootList = new AttributeList();
+    rootList.addNamespaceDeclaration(null, ConnectionModule.NAMESPACE);
+
+    writer.writeTag(ConnectionModule.NAMESPACE, "connections", rootList, XmlWriter.OPEN);
     for (int i = 0; i < connections.length; i++)
     {
       final IDatabaseConnection connection = connections[i];
       write(connection, writer);
     }
     writer.writeCloseTag();
+    writer.flush();
   }
 
   private void write(final IDatabaseConnection databaseConnection, final XmlWriter writer) throws IOException
@@ -93,6 +98,7 @@ public class FileDataSourceMgmtWriter
         writer.writeTextNormalized(e.getValue(), false);
         writer.writeCloseTag();
       }
+      writer.writeCloseTag();
     }
     writer.writeCloseTag();
   }

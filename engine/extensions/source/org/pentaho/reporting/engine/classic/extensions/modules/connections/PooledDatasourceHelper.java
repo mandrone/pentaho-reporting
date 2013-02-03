@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverConnectionFactory;
-import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.logging.Log;
@@ -39,7 +38,7 @@ import org.pentaho.database.dialect.GenericDatabaseDialect;
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.database.service.IDatabaseDialectService;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
-import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DBDatasourceServiceException;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DatasourceServiceException;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DataBaseConnectionAttributes;
 import org.pentaho.reporting.libraries.base.config.Configuration;
 import org.pentaho.reporting.libraries.base.util.ObjectUtilities;
@@ -48,13 +47,14 @@ import org.pentaho.reporting.libraries.base.util.StringUtils;
 public class PooledDatasourceHelper
 {
   private static final Log logger = LogFactory.getLog(PooledDatasourceHelper.class);
+  public static final String GENERIC = "GENERIC";
 
   private PooledDatasourceHelper()
   {
   }
 
   public static PoolingDataSource setupPooledDataSource(final IDatabaseConnection databaseConnection)
-      throws DBDatasourceServiceException
+      throws DatasourceServiceException
   {
     try
     {
@@ -64,7 +64,7 @@ public class PooledDatasourceHelper
       final IDatabaseDialect dialect = databaseDialectService.getDialect(databaseConnection);
 
       final String driverClass;
-      if (databaseConnection.getDatabaseType().getShortName().equals("GENERIC")) //$NON-NLS-1$
+      if (GENERIC.equals(databaseConnection.getDatabaseType().getShortName())) //$NON-NLS-1$
       {
         driverClass = databaseConnection.getAttributes().get(GenericDatabaseDialect.ATTRIBUTE_CUSTOM_DRIVER_CLASS);
       }
@@ -201,7 +201,7 @@ public class PooledDatasourceHelper
     }
     catch (Exception e)
     {
-      throw new DBDatasourceServiceException(e);
+      throw new DatasourceServiceException(e);
     }
   }
 
@@ -217,7 +217,7 @@ public class PooledDatasourceHelper
     final IDatabaseDialectService databaseDialectService =
         ClassicEngineBoot.getInstance().getObjectFactory().get(IDatabaseDialectService.class);
     final IDatabaseDialect dialect = databaseDialectService.getDialect(databaseConnection);
-    if (databaseConnection.getDatabaseType().getShortName().equals("GENERIC"))//$NON-NLS-1$
+    if ("GENERIC".equals(databaseConnection.getDatabaseType().getShortName()))//$NON-NLS-1$
     {
       basicDatasource.setDriverClassName(databaseConnection.getAttributes().get(GenericDatabaseDialect.ATTRIBUTE_CUSTOM_DRIVER_CLASS));
     }

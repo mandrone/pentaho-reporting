@@ -1,12 +1,8 @@
 package org.pentaho.reporting.engine.classic.core.modules.misc.connections;
 
-import java.sql.SQLException;
 import java.util.Iterator;
-import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.Name;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
@@ -52,20 +48,20 @@ public class JndiDataSourceService implements DataSourceService
   {
   }
 
-  public DataSource getDataSource(final String dsName) throws DBDatasourceServiceException
+  public DataSource getDataSource(final String dsName) throws DatasourceServiceException
   {
     final LookupResult result = findDataSource(dsName);
     return result.dataSource;
   }
 
-  public String getDSBoundName(final String dsName) throws DBDatasourceServiceException
+  public String getDSBoundName(final String dsName) throws DatasourceServiceException
   {
     final LookupResult result = findDataSource(dsName);
     return result.path;
   }
 
   private LookupResult findDataSource(final String connectionPath)
-      throws DBDatasourceServiceException
+      throws DatasourceServiceException
   {
     try
     {
@@ -93,6 +89,7 @@ public class JndiDataSourceService implements DataSourceService
       final String prefix = config.getConfigProperty(key);
       try
       {
+        final Context initialContext = getInitialContext();
         final Object o = initialContext.lookup(prefix + connectionPath);
         if (o instanceof DataSource)
         {
@@ -109,7 +106,7 @@ public class JndiDataSourceService implements DataSourceService
       }
     }
 
-    throw new DBDatasourceServiceException("Failed to access the JNDI system: Cannot find the requested datasource '" +
+    throw new DatasourceServiceException("Failed to access the JNDI system: Cannot find the requested datasource '" +
         connectionPath + "' anywhere in the JNDI system.");
   }
 }

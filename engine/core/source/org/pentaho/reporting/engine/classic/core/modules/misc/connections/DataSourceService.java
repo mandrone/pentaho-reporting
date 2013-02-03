@@ -25,7 +25,7 @@ public interface DataSourceService
    * @param dsName The Datasource name
    * @return DataSource if there is one bound in JNDI
    */
-  public DataSource getDataSource(String dsName) throws DBDatasourceServiceException;
+  public DataSource getDataSource(String dsName) throws DatasourceServiceException;
 
   /**
    * Since JNDI is supported different ways in different app servers, it's
@@ -36,6 +36,6 @@ public interface DataSourceService
    * @param dsName The Datasource name (like SampleData)
    * @return The bound DS name if it is bound in JNDI (like "jdbc/SampleData")
    */
-  public String getDSBoundName(String dsName) throws DBDatasourceServiceException;
+  public String getDSBoundName(String dsName) throws DatasourceServiceException;
 
 }

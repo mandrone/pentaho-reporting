@@ -9,7 +9,7 @@ import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.database.service.IDatabaseDialectService;
 import org.pentaho.database.util.DatabaseTypeHelper;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
-import org.pentaho.reporting.engine.classic.extensions.modules.connections.ConnectionModule;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.ConnectionModule;
 import org.pentaho.reporting.libraries.base.boot.ObjectFactory;
 import org.pentaho.reporting.libraries.xmlns.parser.AbstractXmlReadHandler;
 import org.pentaho.reporting.libraries.xmlns.parser.PropertiesReadHandler;

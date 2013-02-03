@@ -4,28 +4,31 @@ import javax.sql.DataSource;
 
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
-import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DBDatasourceServiceException;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DataSourceMgmtService;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DataSourceService;
-import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DatasourceMgmtService;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DatasourceMgmtServiceException;
+import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DatasourceServiceException;
+import org.pentaho.reporting.libraries.base.boot.ObjectFactory;
+import org.pentaho.reporting.libraries.base.boot.SingletonHint;
 
+@SingletonHint
 public class PooledDataSourceService implements DataSourceService
 {
   private DataSourceCache cacheManager;
 
   public PooledDataSourceService()
   {
-    final DataSourceCacheManager manager =
-        ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceCacheManager.class);
+    final ObjectFactory objectFactory = ClassicEngineBoot.getInstance().getObjectFactory();
+    final DataSourceCacheManager manager = objectFactory.get(DataSourceCacheManager.class);
     cacheManager = manager.getDataSourceCache();
   }
 
-  protected DataSource retrieve(final String datasource) throws DBDatasourceServiceException
+  protected DataSource retrieve(final String datasource) throws DatasourceServiceException
   {
     try
     {
-      final DatasourceMgmtService datasourceMgmtSvc =
-          ClassicEngineBoot.getInstance().getObjectFactory().get(DatasourceMgmtService.class);
+      final DataSourceMgmtService datasourceMgmtSvc =
+          ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceMgmtService.class);
       final IDatabaseConnection databaseConnection = datasourceMgmtSvc.getDatasourceByName(datasource);
       if (datasource != null)
       {
@@ -33,15 +36,20 @@ public class PooledDataSourceService implements DataSourceService
       }
       else
       {
-        throw new DBDatasourceServiceException
-            (Messages.getInstance().getString("PooledDataSourceService.ERROR_0002_UNABLE_TO_GET_DATASOURCE")); //$NON-NLS-1$
+        return queryFallback(datasource);
       }
     }
     catch (DatasourceMgmtServiceException daoe)
     {
-      throw new DBDatasourceServiceException
-          (Messages.getInstance().getString("PooledDataSourceService.ERROR_0002_UNABLE_TO_GET_DATASOURCE"), daoe); //$NON-NLS-1$
+      throw new DatasourceServiceException
+          (Messages.getInstance().getString("PooledDataSourceService.ERROR_0002_UNABLE_TO_GET_DATASOURCE", datasource), daoe); //$NON-NLS-1$
     }
+  }
+
+  protected DataSource queryFallback(final String dataSource)
+  {
+    throw new DatasourceServiceException
+        (Messages.getInstance().getString("PooledDataSourceService.ERROR_0002_UNABLE_TO_GET_DATASOURCE", dataSource)); //$NON-NLS-1$
   }
 
   /**
@@ -72,7 +80,7 @@ public class PooledDataSourceService implements DataSourceService
    * @return DataSource if there is one bound in JNDI
    */
   public DataSource getDataSource(final String dsName)
-      throws DBDatasourceServiceException
+      throws DatasourceServiceException
   {
     if (cacheManager != null)
     {
@@ -97,9 +105,10 @@ public class PooledDataSourceService implements DataSourceService
    *
    * @param dsName The Datasource name (like SampleData)
    * @return The bound DS name if it is bound in JNDI (like "jdbc/SampleData")
-   * @throws DBDatasourceServiceException
+   * @throws org.pentaho.reporting.engine.classic.core.modules.misc.connections.DatasourceServiceException
+   *
    */
-  public String getDSBoundName(final String dsName) throws DBDatasourceServiceException
+  public String getDSBoundName(final String dsName) throws DatasourceServiceException
   {
     return dsName;
   }
