@@ -7,7 +7,7 @@ import org.pentaho.database.model.IDatabaseConnection;
 /**
  * A design-time interface.
  */
-public interface DatasourceMgmtService
+public interface DataSourceMgmtService
 {
   /**
    * Creates a JDBC datasource in a given repository and return an id
