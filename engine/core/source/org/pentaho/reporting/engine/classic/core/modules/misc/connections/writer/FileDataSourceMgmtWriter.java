@@ -10,6 +10,7 @@ import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.ConnectionModule;
 import org.pentaho.reporting.libraries.base.util.StringUtils;
 import org.pentaho.reporting.libraries.xmlns.common.AttributeList;
+import org.pentaho.reporting.libraries.xmlns.writer.DefaultTagDescription;
 import org.pentaho.reporting.libraries.xmlns.writer.XmlWriter;
 
 public class FileDataSourceMgmtWriter implements DataSourceMgmtWriter
@@ -45,7 +46,12 @@ public class FileDataSourceMgmtWriter implements DataSourceMgmtWriter
 
   public void write(final IDatabaseConnection[] connections, final OutputStream out) throws IOException
   {
-    final XmlWriter writer = new XmlWriter(new OutputStreamWriter(out, "UTF-8"));
+    DefaultTagDescription tagDescription = new DefaultTagDescription();
+    tagDescription.setDefaultNamespace(ConnectionModule.NAMESPACE);
+    tagDescription.setNamespaceHasCData(ConnectionModule.NAMESPACE, false);
+    tagDescription.setElementHasCData(ConnectionModule.NAMESPACE, "attribute", true);
+
+    final XmlWriter writer = new XmlWriter(new OutputStreamWriter(out, "UTF-8"), tagDescription);
     writer.writeXmlDeclaration("UTF-8");
 
     final AttributeList rootList = new AttributeList();

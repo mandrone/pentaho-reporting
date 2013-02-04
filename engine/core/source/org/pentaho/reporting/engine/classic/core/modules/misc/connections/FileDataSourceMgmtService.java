@@ -276,7 +276,7 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
   {
     if (target == null)
     {
-      createTargetFile();
+      target = createTargetFile();
     }
     if (target == null)
     {
@@ -345,7 +345,7 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
 
       if (target == null)
       {
-        createTargetFile();
+        target = createTargetFile();
       }
       if (target == null)
       {
