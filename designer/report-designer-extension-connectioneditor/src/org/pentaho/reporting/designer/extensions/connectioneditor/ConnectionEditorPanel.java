@@ -21,8 +21,6 @@ import javax.swing.event.ListSelectionListener;
 
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.reporting.designer.core.util.exceptions.UncaughtExceptionsModel;
-import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
-import org.pentaho.reporting.engine.classic.core.modules.misc.connections.DataSourceMgmtService;
 import org.pentaho.reporting.libraries.base.util.StringUtils;
 import org.pentaho.reporting.libraries.designtime.swing.BorderlessButton;
 import org.pentaho.reporting.libraries.designtime.swing.LibSwingUtil;
@@ -256,7 +254,7 @@ public class ConnectionEditorPanel extends JPanel
     return dataSourceList.getSelectedIndex() != -1;
   }
 
-  public void commit ()
+  public void commit()
   {
     dialogModel.commit();
   }

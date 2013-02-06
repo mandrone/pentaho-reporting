@@ -164,8 +164,9 @@ public class JdbcConnectionPanel extends ConnectionPanel
           return dcd;
         }
       }
-      return new JndiConnectionDefinition(getBundleSupport().getString("JdbcConnectionPanel.CustomConnection"),
-          jcp.getConnectionPath(), null, jcp.getUsername(), jcp.getPassword());
+      return new JndiConnectionDefinition
+          (getBundleSupport().getString("JdbcConnectionPanel.CustomConnection"),
+          jcp.getConnectionPath(), null, jcp.getUsername(), jcp.getPassword(), false);
     }
     return null;
   }

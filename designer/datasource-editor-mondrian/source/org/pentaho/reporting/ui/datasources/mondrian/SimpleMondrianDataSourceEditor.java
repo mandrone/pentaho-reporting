@@ -419,7 +419,7 @@ public abstract class SimpleMondrianDataSourceEditor extends CommonDialog
         }
       }
       return new JndiConnectionDefinition(customName, jcp.getConnectionPath(), null,
-          dataFactory.getJdbcUser(), dataFactory.getJdbcPassword());
+          dataFactory.getJdbcUser(), dataFactory.getJdbcPassword(), false);
     }
 
     return null;

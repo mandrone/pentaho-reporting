@@ -1097,7 +1097,7 @@ public abstract class MondrianDataSourceEditor extends CommonDialog
           return dcd;
         }
       }
-      return new JndiConnectionDefinition(customName, jcp.getConnectionPath(), null, null, null);
+      return new JndiConnectionDefinition(customName, jcp.getConnectionPath(), null, null, null, false);
     }
 
     return null;
