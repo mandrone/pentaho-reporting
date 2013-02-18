@@ -20,15 +20,6 @@ public interface DataSourceMgmtService
   public String createDatasource(IDatabaseConnection databaseConnection) throws DuplicateDatasourceException, DatasourceMgmtServiceException;
 
   /**
-   * Permanently deletes a JDBC datasource from a repository by name
-   *
-   * @param name
-   * @throws NonExistingDatasourceException
-   * @throws DatasourceMgmtServiceException
-   */
-  public void deleteDatasourceByName(String name) throws NonExistingDatasourceException, DatasourceMgmtServiceException;
-
-  /**
    * Permanently deletes a JDBC datasource from a repository by id
    *
    * @param id
@@ -70,19 +61,6 @@ public interface DataSourceMgmtService
    * @throws DatasourceMgmtServiceException
    */
   public List<String> getDatasourceIds() throws DatasourceMgmtServiceException;
-
-  /**
-   * Updates a given JDBC datasource by name
-   *
-   * @param name
-   * @param databaseConnection
-   * @return id
-   * @throws NonExistingDatasourceException
-   * @throws DatasourceMgmtServiceException
-   */
-  public String updateDatasourceByName(String name,
-                                       IDatabaseConnection databaseConnection)
-      throws NonExistingDatasourceException, DatasourceMgmtServiceException;
 
   /**
    * Updates a given JDBC datasource by id

@@ -1,12 +1,9 @@
 package org.pentaho.reporting.engine.classic.core.modules.misc.connections;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,7 +16,6 @@ import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.parser.DatabaseConnectionCollection;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.writer.DataSourceMgmtWriter;
-import org.pentaho.reporting.engine.classic.core.modules.misc.connections.writer.FileDataSourceMgmtWriter;
 import org.pentaho.reporting.engine.classic.core.util.ConfigurationPropertyLookupParser;
 import org.pentaho.reporting.libraries.base.boot.SingletonHint;
 import org.pentaho.reporting.libraries.base.config.Configuration;
@@ -28,50 +24,10 @@ import org.pentaho.reporting.libraries.resourceloader.ResourceException;
 import org.pentaho.reporting.libraries.resourceloader.ResourceKey;
 import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
 
+@SuppressWarnings("HardCodedStringLiteral")
 @SingletonHint
 public class FileDataSourceMgmtService implements DataSourceMgmtService
 {
-  private static class SerializedConnection
-  {
-    private byte[] connection;
-
-    private SerializedConnection(final IDatabaseConnection connection)
-        throws DatasourceMgmtServiceException
-    {
-      try
-      {
-        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        final ObjectOutputStream out = new ObjectOutputStream(bout);
-        out.writeObject(connection);
-        out.close();
-
-        this.connection = bout.toByteArray();
-      }
-      catch (IOException ioe)
-      {
-        throw new DatasourceMgmtServiceException(ioe);
-      }
-    }
-
-    public IDatabaseConnection getConnection()
-    {
-      try
-      {
-        // return a copy, by deserializing the result.
-        final ByteArrayInputStream bin = new ByteArrayInputStream(connection);
-        final ObjectInputStream in = new ObjectInputStream(bin);
-        return (IDatabaseConnection) in.readObject();
-      }
-      catch (IOException e)
-      {
-        throw new DatasourceMgmtServiceException("Unable to deserialize database connections.", e);
-      }
-      catch (ClassNotFoundException e)
-      {
-        throw new DatasourceMgmtServiceException("Unable to deserialize database connections.", e);
-      }
-    }
-  }
 
   private static final Log logger = LogFactory.getLog(FileDataSourceMgmtService.class);
   private HashMap<String, SerializedConnection> connectionsByName;
@@ -140,23 +96,6 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
     return UUID.randomUUID().toString();
   }
 
-  public synchronized void deleteDatasourceByName(final String name)
-      throws NonExistingDatasourceException, DatasourceMgmtServiceException
-  {
-    load();
-
-    final SerializedConnection connection = connectionsByName.get(name);
-    if (connection == null)
-    {
-      throw new NonExistingDatasourceException();
-    }
-    final IDatabaseConnection databaseConnection = connection.getConnection();
-    connectionsByName.remove(databaseConnection.getName());
-    connectionsById.remove(databaseConnection.getId());
-
-    writeChanges();
-  }
-
   public synchronized void deleteDatasourceById(final String id) throws NonExistingDatasourceException, DatasourceMgmtServiceException
   {
     load();
@@ -223,31 +162,6 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
     return connections;
   }
 
-  public String updateDatasourceByName(final String name,
-                                       final IDatabaseConnection databaseConnection)
-      throws NonExistingDatasourceException, DatasourceMgmtServiceException
-  {
-    load();
-
-    final SerializedConnection connection = connectionsByName.get(name);
-    if (connection == null)
-    {
-      throw new NonExistingDatasourceException();
-    }
-    connectionsById.remove(connection.getConnection().getId());
-
-    final String id = UUID.randomUUID().toString();
-    databaseConnection.setId(id);
-    databaseConnection.setName(name);
-    final SerializedConnection serializedConnection = new SerializedConnection(databaseConnection);
-    connectionsById.put(id, serializedConnection);
-    connectionsByName.put(name, serializedConnection);
-
-    writeChanges();
-
-    return id;
-  }
-
   public String updateDatasourceById(final String id,
                                      final IDatabaseConnection databaseConnection)
       throws NonExistingDatasourceException, DatasourceMgmtServiceException
@@ -292,12 +206,12 @@ public class FileDataSourceMgmtService implements DataSourceMgmtService
     {
       try
       {
-        ResourceManager mgr = new ResourceManager();
+        final ResourceManager mgr = new ResourceManager();
         mgr.registerDefaults();
         final ResourceKey key = mgr.createKey(target);
         final Resource resource = mgr.create(key, null, DatabaseConnectionCollection.class);
         final DatabaseConnectionCollection collection = (DatabaseConnectionCollection) resource.getResource();
-        for (IDatabaseConnection connection : collection.getConnections())
+        for (final IDatabaseConnection connection : collection.getConnections())
         {
           final String id = connection.getId();
           final String name = connection.getName();
