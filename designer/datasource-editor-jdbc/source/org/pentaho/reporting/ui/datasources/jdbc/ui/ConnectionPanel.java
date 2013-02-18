@@ -50,6 +50,7 @@ import org.pentaho.reporting.libraries.base.util.StringUtils;
 import org.pentaho.reporting.libraries.designtime.swing.BorderlessButton;
 import org.pentaho.reporting.libraries.designtime.swing.LibSwingUtil;
 import org.pentaho.reporting.ui.datasources.jdbc.JdbcDataSourceModule;
+import org.pentaho.reporting.ui.datasources.jdbc.Messages;
 import org.pentaho.reporting.ui.datasources.jdbc.connection.JdbcConnectionDefinition;
 import org.pentaho.reporting.ui.datasources.jdbc.connection.JndiConnectionDefinition;
 import org.pentaho.ui.xul.XulException;
@@ -110,15 +111,15 @@ public abstract class ConnectionPanel extends JPanel
       }
       else if (ConnectionsTreeModel.MetaNode.ROOT.equals(value))
       {
-        listCellRendererComponent.setText("ROOT");
+        listCellRendererComponent.setText("ROOT"); // NON-NLS
       }
       else if (ConnectionsTreeModel.MetaNode.PRIVATE.equals(value))
       {
-        listCellRendererComponent.setText("Stored Connections");
+        listCellRendererComponent.setText(Messages.getString("ConnectionPanel.StoredConnections"));
       }
       else if (ConnectionsTreeModel.MetaNode.SHARED.equals(value))
       {
-        listCellRendererComponent.setText("Shared Connections");
+        listCellRendererComponent.setText(Messages.getString("ConnectionPanel.SharedConnections"));
       }
       return listCellRendererComponent;
     }
