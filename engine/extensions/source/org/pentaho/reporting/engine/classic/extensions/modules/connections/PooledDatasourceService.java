@@ -12,11 +12,11 @@ import org.pentaho.reporting.libraries.base.boot.ObjectFactory;
 import org.pentaho.reporting.libraries.base.boot.SingletonHint;
 
 @SingletonHint
-public class PooledDataSourceService implements DataSourceService
+public class PooledDatasourceService implements DataSourceService
 {
   private DataSourceCache cacheManager;
 
-  public PooledDataSourceService()
+  public PooledDatasourceService()
   {
     final ObjectFactory objectFactory = ClassicEngineBoot.getInstance().getObjectFactory();
     final DataSourceCacheManager manager = objectFactory.get(DataSourceCacheManager.class);

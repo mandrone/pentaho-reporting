@@ -6,7 +6,7 @@ import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.modules.misc.connections.JndiDataSourceService;
 import org.pentaho.reporting.libraries.base.boot.ObjectFactory;
 
-public class PooledWithJndiDataSourceService extends PooledDataSourceService
+public class PooledWithJndiDataSourceService extends PooledDatasourceService
 {
   private JndiDataSourceService fallbackService;
 
