@@ -39,9 +39,16 @@ public class EditDataSourceMgmtService implements DataSourceMgmtService
     {
       throw new IllegalArgumentException();
     }
-    if (getDatasourceByName(name) != null)
+    try
     {
-      throw new DuplicateDatasourceException();
+      if (getDatasourceByName(name) != null)
+      {
+        throw new DuplicateDatasourceException();
+      }
+    }
+    catch (NonExistingDatasourceException nde)
+    {
+      // expected exception as a result of the getDatasourceByName call.
     }
 
     final String id = UUID.randomUUID().toString();
