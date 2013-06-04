@@ -58,7 +58,8 @@ public class PooledDatasourceHelper
   {
     try
     {
-      final DataSourceCache cacheManager = ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceCache.class);
+      final DataSourceCacheManager cacheManager =
+          ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceCacheManager.class);
       final IDatabaseDialectService databaseDialectService =
           ClassicEngineBoot.getInstance().getObjectFactory().get(IDatabaseDialectService.class);
       final IDatabaseDialect dialect = databaseDialectService.getDialect(databaseConnection);
@@ -93,9 +94,9 @@ public class PooledDatasourceHelper
       final String testWhileIdleValue = getSystemSetting("dbcp-defaults.test-while-idle");  //$NON-NLS-1$
       final String testOnBorrowValue = getSystemSetting("dbcp-defaults.test-on-borrow");  //$NON-NLS-1$
       final String testOnReturnValue = getSystemSetting("dbcp-defaults.test-on-return");  //$NON-NLS-1$
-      final boolean testWhileIdle = !StringUtils.isEmpty(testWhileIdleValue) ? Boolean.parseBoolean(testWhileIdleValue) : false;
-      final boolean testOnBorrow = !StringUtils.isEmpty(testOnBorrowValue) ? Boolean.parseBoolean(testOnBorrowValue) : false;
-      final boolean testOnReturn = !StringUtils.isEmpty(testOnReturnValue) ? Boolean.parseBoolean(testOnReturnValue) : false;
+      final boolean testWhileIdle = !StringUtils.isEmpty(testWhileIdleValue) && Boolean.parseBoolean(testWhileIdleValue);
+      final boolean testOnBorrow = !StringUtils.isEmpty(testOnBorrowValue) && Boolean.parseBoolean(testOnBorrowValue);
+      final boolean testOnReturn = !StringUtils.isEmpty(testOnReturnValue) && Boolean.parseBoolean(testOnReturnValue);
       int maxActiveConnection = -1;
       long waitTime = -1;
       byte whenExhaustedActionType = -1;
@@ -169,6 +170,8 @@ public class PooledDatasourceHelper
 	    Puts pool-specific wrappers on factory connections.  For clarification:
 	    "[PoolableConnection]Factory," not "Poolable[ConnectionFactory]."
 	    */
+      // This declaration is used implicitly.
+      //noinspection UnusedDeclaration
       final PoolableConnectionFactory pcf = new PoolableConnectionFactory(factory, // ConnectionFactory
           pool, // ObjectPool
           null, // KeyedObjectPoolFactory
@@ -196,7 +199,7 @@ public class PooledDatasourceHelper
       poolingDataSource.setPool(pool);
 
       // store the pool, so we can get to it later
-      cacheManager.put(databaseConnection.getName(), poolingDataSource);
+      cacheManager.getDataSourceCache().put(databaseConnection.getName(), poolingDataSource);
       return (poolingDataSource);
     }
     catch (Exception e)
