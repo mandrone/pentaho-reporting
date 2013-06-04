@@ -193,13 +193,11 @@ public class ConnectionEditorPanel extends JPanel
   }
 
   private EditDataSourceMgmtService dialogModel;
-  private boolean securityConfigurationAvailable;
   private JList dataSourceList;
   private EditorComboBoxModel dataSourceModel;
 
   public ConnectionEditorPanel()
   {
-    this.securityConfigurationAvailable = true;
     this.dialogModel = new EditDataSourceMgmtService();
     initPanel();
   }
@@ -238,16 +236,6 @@ public class ConnectionEditorPanel extends JPanel
 
     add(BorderLayout.NORTH, connectionButtonPanelWrapper);
     add(BorderLayout.CENTER, new JScrollPane(dataSourceList));
-  }
-
-  public boolean isSecurityConfigurationAvailable()
-  {
-    return securityConfigurationAvailable;
-  }
-
-  public void setSecurityConfigurationAvailable(final boolean securityConfigurationAvailable)
-  {
-    this.securityConfigurationAvailable = securityConfigurationAvailable;
   }
 
   protected boolean isConnectionSelected()

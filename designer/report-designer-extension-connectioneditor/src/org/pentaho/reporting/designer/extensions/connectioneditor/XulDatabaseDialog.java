@@ -153,17 +153,6 @@ public class XulDatabaseDialog
 
     this.id = def.getId();
     this.meta = new DatabaseMeta();
-    this.meta.setAccessType(convertAccessTypeToKettle(def.getAccessType()));
-    this.meta.setAttributes(convertToKettle(def.getAttributes()));
-    this.meta.setUsername(def.getUsername());
-    this.meta.setPassword(def.getPassword());
-    this.meta.setName(def.getName());
-    this.meta.setDataTablespace(def.getDataTablespace());
-    this.meta.setDBName(def.getDatabaseName());
-    this.meta.setDBPort(def.getDatabasePort());
-    this.meta.setHostname(def.getHostname());
-    this.meta.setIndexTablespace(def.getIndexTablespace());
-    this.meta.setServername(def.getInformixServername());
     final IDatabaseType databaseType = def.getDatabaseType();
     if (databaseType != null)
     {
@@ -181,6 +170,17 @@ public class XulDatabaseDialog
         this.meta.setDatabaseType(kettleType);
       }
     }
+    this.meta.setAccessType(convertAccessTypeToKettle(def.getAccessType()));
+    this.meta.setAttributes(convertToKettle(def.getAttributes()));
+    this.meta.setUsername(def.getUsername());
+    this.meta.setPassword(def.getPassword());
+    this.meta.setName(def.getName());
+    this.meta.setDataTablespace(def.getDataTablespace());
+    this.meta.setDBName(def.getDatabaseName());
+    this.meta.setDBPort(def.getDatabasePort());
+    this.meta.setHostname(def.getHostname());
+    this.meta.setIndexTablespace(def.getIndexTablespace());
+    this.meta.setServername(def.getInformixServername());
   }
 
   private IDatabaseConnection getData()
