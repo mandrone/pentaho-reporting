@@ -188,7 +188,7 @@ public abstract class ConnectionPanel extends JPanel
       {
         final Window parentWindow = LibSwingUtil.getWindowAncestor(ConnectionPanel.this);
         final XulDatabaseDialog connectionDialog = new XulDatabaseDialog(parentWindow, designTimeContext);
-        final JdbcConnectionDefinition connectionDefinition = connectionDialog.oerformEdit(existingConnection, false);
+        final JdbcConnectionDefinition connectionDefinition = connectionDialog.performEdit(existingConnection, false);
 
         // See if the edit completed...
         if (connectionDefinition != null)
@@ -288,7 +288,7 @@ public abstract class ConnectionPanel extends JPanel
       {
         final Window parentWindow = LibSwingUtil.getWindowAncestor(ConnectionPanel.this);
         final XulDatabaseDialog connectionDialog = new XulDatabaseDialog(parentWindow, designTimeContext);
-        final JdbcConnectionDefinition connectionDefinition = connectionDialog.oerformEdit(null, false);
+        final JdbcConnectionDefinition connectionDefinition = connectionDialog.performEdit(null, false);
 
         if (connectionDefinition != null &&
             !StringUtils.isEmpty(connectionDefinition.getName()))

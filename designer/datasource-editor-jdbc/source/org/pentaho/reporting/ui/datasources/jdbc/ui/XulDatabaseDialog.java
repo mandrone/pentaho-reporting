@@ -242,7 +242,7 @@ public class XulDatabaseDialog
     }
   }
 
-  public JdbcConnectionDefinition oerformEdit(final JdbcConnectionDefinition definition, final boolean shared)
+  public JdbcConnectionDefinition performEdit(final JdbcConnectionDefinition definition, final boolean shared)
   {
     setData(definition);
     this.shared = shared;
