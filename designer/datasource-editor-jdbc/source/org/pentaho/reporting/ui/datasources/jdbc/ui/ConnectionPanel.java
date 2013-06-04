@@ -52,7 +52,6 @@ import org.pentaho.reporting.libraries.designtime.swing.LibSwingUtil;
 import org.pentaho.reporting.ui.datasources.jdbc.JdbcDataSourceModule;
 import org.pentaho.reporting.ui.datasources.jdbc.Messages;
 import org.pentaho.reporting.ui.datasources.jdbc.connection.JdbcConnectionDefinition;
-import org.pentaho.reporting.ui.datasources.jdbc.connection.JndiConnectionDefinition;
 import org.pentaho.ui.xul.XulException;
 
 public abstract class ConnectionPanel extends JPanel
@@ -162,12 +161,22 @@ public abstract class ConnectionPanel extends JPanel
         putValue(Action.NAME, bundleSupport.getString("ConnectionPanel.Edit.Name"));
       }
       putValue(Action.SHORT_DESCRIPTION, bundleSupport.getString("ConnectionPanel.Edit.Description"));
-      setEnabled(getDialogModel().isConnectionSelected());
+      setEnabled(isEditable());
     }
 
     public void propertyChange(final PropertyChangeEvent evt)
     {
-      setEnabled(getDialogModel().isConnectionSelected());
+      setEnabled(isEditable());
+    }
+
+    private boolean isEditable()
+    {
+      final JdbcConnectionDefinition selectedValue = getSelectedValue();
+      if (selectedValue == null)
+      {
+        return false;
+      }
+      return !selectedValue.isShared();
     }
 
     public void actionPerformed(final ActionEvent e)
@@ -211,7 +220,6 @@ public abstract class ConnectionPanel extends JPanel
      */
     private RemoveDataSourceAction()
     {
-      setEnabled(getDialogModel().isConnectionSelected());
       final URL resource = ConnectionPanel.class.getResource("/org/pentaho/reporting/ui/datasources/jdbc/resources/Remove.png");
       if (resource != null)
       {
@@ -222,10 +230,26 @@ public abstract class ConnectionPanel extends JPanel
         putValue(Action.NAME, bundleSupport.getString("ConnectionPanel.Remove.Name"));
       }
       putValue(Action.SHORT_DESCRIPTION, bundleSupport.getString("ConnectionPanel.Remove.Description"));
+      computeEnabled();
     }
 
     public void propertyChange(final PropertyChangeEvent evt)
     {
+      computeEnabled();
+    }
+
+    private void computeEnabled()
+    {
+      final JdbcConnectionDefinition selectedValue = getSelectedValue();
+      if (selectedValue != null)
+      {
+        if (selectedValue.isShared())
+        {
+          setEnabled(false);
+          return;
+        }
+      }
+
       setEnabled(getDialogModel().isConnectionSelected());
     }
 
@@ -284,6 +308,32 @@ public abstract class ConnectionPanel extends JPanel
     }
   }
 
+  private class SelectionHandler implements TreeSelectionListener
+  {
+    private SelectionHandler()
+    {
+    }
+
+    public void valueChanged(final TreeSelectionEvent e)
+    {
+      final TreePath selectionPath = dataSourceList.getSelectionPath();
+      if (selectionPath == null)
+      {
+        dialogModel.getConnections().setSelectedItem(null);
+        return;
+      }
+      final Object lastPathComponent = selectionPath.getLastPathComponent();
+      if (lastPathComponent instanceof JdbcConnectionDefinition)
+      {
+        dialogModel.getConnections().setSelectedItem(lastPathComponent);
+      }
+      else
+      {
+        dialogModel.getConnections().setSelectedItem(null);
+      }
+    }
+  }
+
   private DataSourceDialogModel dialogModel;
   private DesignTimeContext designTimeContext;
   private ResourceBundleSupport bundleSupport;
@@ -309,6 +359,7 @@ public abstract class ConnectionPanel extends JPanel
 
     final DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
     selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    selectionModel.addTreeSelectionListener(new SelectionHandler());
 
     dataSourceList = new JTree(connectionsTreeModel);
     dataSourceList.setCellRenderer(new DataSourceDefinitionListCellRenderer());
@@ -380,7 +431,7 @@ public abstract class ConnectionPanel extends JPanel
       return null;
     }
     final Object lastPathComponent = selectionPath.getLastPathComponent();
-    if (lastPathComponent instanceof JndiConnectionDefinition)
+    if (lastPathComponent instanceof JdbcConnectionDefinition)
     {
       return (JdbcConnectionDefinition) lastPathComponent;
     }

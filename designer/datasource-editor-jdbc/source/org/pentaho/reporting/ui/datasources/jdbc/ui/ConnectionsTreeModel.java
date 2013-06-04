@@ -30,17 +30,27 @@ public class ConnectionsTreeModel implements TreeModel
 
     public void intervalAdded(final ListDataEvent e)
     {
-      refresh();
+      final ArrayList<JdbcConnectionDefinition> list = new ArrayList<JdbcConnectionDefinition>();
+      for (int i = e.getIndex0(); i <= e.getIndex1(); i += 1)
+      {
+        list.add((JdbcConnectionDefinition) model.getElementAt(i));
+      }
+      fireDataAdded(list.toArray(new JdbcConnectionDefinition[list.size()]));
     }
 
     public void intervalRemoved(final ListDataEvent e)
     {
-      refresh();
+      final ArrayList<JdbcConnectionDefinition> list = new ArrayList<JdbcConnectionDefinition>();
+      for (int i = e.getIndex0(); i <= e.getIndex1(); i += 1)
+      {
+        list.add((JdbcConnectionDefinition) model.getElementAt(i));
+      }
+      fireDataRemoved(list.toArray(new JdbcConnectionDefinition[list.size()]));
     }
 
     public void contentsChanged(final ListDataEvent e)
     {
-//      refresh();
+//      rebuildLocalData();
     }
   }
 
@@ -64,10 +74,10 @@ public class ConnectionsTreeModel implements TreeModel
     privateConnections = new ArrayList<JdbcConnectionDefinition>();
     this.model = model;
     this.model.addListDataListener(new ChangeHandler());
-    refresh();
+    rebuildLocalData();
   }
 
-  public void refresh()
+  private void rebuildLocalData()
   {
     sharedConnections.clear();
     privateConnections.clear();
@@ -86,12 +96,65 @@ public class ConnectionsTreeModel implements TreeModel
       }
       privateConnections.add((JdbcConnectionDefinition) elementAt);
     }
-    fireTreeDataChanged();
   }
 
-  public void fireTreeDataChanged()
+  private void fireDataRemoved(final JdbcConnectionDefinition[] args)
   {
-    fireTreeDataChanged(new TreePath(getRoot()));
+    // collect data for events later ..
+    final int[] indices = new int[args.length];
+    final TreeModelListener[] treeModelListeners = getListeners();
+    for (int a = 0; a < args.length; a += 1)
+    {
+      final JdbcConnectionDefinition connectionDefinition = args[a];
+      indices[a] = privateConnections.indexOf(connectionDefinition);
+    }
+
+    rebuildLocalData();
+
+    final TreePath treePath = new TreePath(new Object[]{getRoot(), privateNode});
+    for (int a = 0; a < args.length; a += 1)
+    {
+      final int index = indices[a];
+      if (index == -1)
+      {
+        continue;
+      }
+
+      final JdbcConnectionDefinition connectionDefinition = args[a];
+      final TreeModelEvent treeEvent = new TreeModelEvent(this, treePath,
+          new int[]{index}, new Object[]{connectionDefinition});
+      for (int i = 0; i < treeModelListeners.length; i++)
+      {
+        final TreeModelListener listener = treeModelListeners[i];
+        listener.treeNodesRemoved(treeEvent);
+      }
+    }
+  }
+
+  private void fireDataAdded(final JdbcConnectionDefinition[] args)
+  {
+    rebuildLocalData();
+
+    // collect data
+    final TreeModelListener[] treeModelListeners = getListeners();
+    final TreePath treePath = new TreePath(new Object[]{getRoot(), privateNode});
+    for (int a = 0; a < args.length; a += 1)
+    {
+      final JdbcConnectionDefinition connectionDefinition = args[a];
+      final int index = privateConnections.indexOf(connectionDefinition);
+      if (index == -1)
+      {
+        continue;
+      }
+
+      final TreeModelEvent treeEvent = new TreeModelEvent(this, treePath,
+          new int[]{index}, new Object[]{connectionDefinition});
+      for (int i = 0; i < treeModelListeners.length; i++)
+      {
+        final TreeModelListener listener = treeModelListeners[i];
+        listener.treeNodesInserted(treeEvent);
+      }
+    }
   }
 
   public void fireTreeDataChanged(final TreePath treePath)
@@ -197,13 +260,19 @@ public class ConnectionsTreeModel implements TreeModel
       return -1;
     }
 
+    if (child instanceof JdbcConnectionDefinition == false)
+    {
+      return -1;
+    }
+
+    final JdbcConnectionDefinition def = (JdbcConnectionDefinition) child;
     if (this.privateNode.equals(parent))
     {
-      return privateConnections.indexOf(child);
+      return privateConnections.indexOf(def);
     }
     if (this.sharedNode.equals(parent))
     {
-      return sharedConnections.indexOf(child);
+      return sharedConnections.indexOf(def);
     }
     return -1;
   }
