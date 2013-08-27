@@ -44,7 +44,7 @@ public class JdbcConnectionDefinitionManager
 
   // The default connection (used if no other connections can be loaded)
   private static final JdbcConnectionDefinition SAMPLE_DATA_JNDI_SOURCE =
-      new JndiConnectionDefinition("SampleData", "SampleData", "Hypersonic", null, null);
+      new JndiConnectionDefinition("SampleData", "SampleData", "Hypersonic", null, null, true);
   private static final JdbcConnectionDefinition SAMPLE_DATA_DRIVER_SOURCE =
       new DriverConnectionDefinition("SampleData (Hypersonic)", "org.hsqldb.jdbcDriver",
           "jdbc:hsqldb:hsql://localhost:9001/sampledata", "pentaho_user", "password");
@@ -149,7 +149,7 @@ public class JdbcConnectionDefinitionManager
         {
           final JndiConnectionDefinition connectionDefinition = new JndiConnectionDefinition
               (name, p.get(JNDI_LOCATION, null), p.get(DATABASE_TYPE_KEY, null),
-                  p.get(USERNAME_KEY, null), p.get(PASSWORD_KEY, null));
+                  p.get(USERNAME_KEY, null), p.get(PASSWORD_KEY, null), false);
           connectionDefinitions.put(name, connectionDefinition);
         }
         else

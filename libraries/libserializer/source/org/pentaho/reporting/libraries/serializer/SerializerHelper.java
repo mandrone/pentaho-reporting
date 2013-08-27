@@ -58,10 +58,6 @@ public class SerializerHelper
     if (singleton == null)
     {
       singleton = LibSerializerBoot.getInstance().getObjectFactory().get(SerializerHelper.class);
-      if (singleton == null)
-      {
-        singleton = new SerializerHelper();
-      }
       singleton.registerMethods();
     }
     return singleton;

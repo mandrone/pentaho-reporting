@@ -164,7 +164,7 @@ public class OlapConnectionPanel extends ConnectionPanel
         }
       }
       return new JndiConnectionDefinition(Messages.getString("Olap4JDataSourceEditor.CustomConnection"),
-          jcp.getConnectionPath(), null, jcp.getUsername(), jcp.getPassword());
+          jcp.getConnectionPath(), null, jcp.getUsername(), jcp.getPassword(), false);
     }
     return null;
   }
