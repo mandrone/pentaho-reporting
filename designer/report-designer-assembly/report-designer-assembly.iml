@@ -16,10 +16,10 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="report-designer" exported="" />
-    <orderEntry type="module" module-name="report-designer-extensions-legacy-charts" exported="" />
-    <orderEntry type="module" module-name="report-designer-extensions-pentaho" exported="" />
     <orderEntry type="module" module-name="report-designer-extension-wizard" exported="" />
     <orderEntry type="module" module-name="report-designer-extension-toc" exported="" />
+    <orderEntry type="module" module-name="report-designer-extension-legacy-charts" exported="" />
+    <orderEntry type="module" module-name="report-designer-extension-pentaho" exported="" />
     <orderEntry type="module" module-name="report-designer-extension-connectioneditor" exported="" />
     <orderEntry type="module" module-name="datasource-editor-external" exported="" />
     <orderEntry type="module" module-name="datasource-editor-jdbc" exported="" />
