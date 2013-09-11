@@ -17,6 +17,8 @@
 
 package org.pentaho.reporting.engine.classic.core.modules.misc.datafactory.sql;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ import org.pentaho.reporting.libraries.base.util.StringUtils;
 
 public class JndiConnectionProvider implements ConnectionProvider
 {
-  private DataSourceService dataSourceService;
+  private transient DataSourceService dataSourceService;
 
   private static final Log logger = LogFactory.getLog(JndiConnectionProvider.class);
   private String connectionPath;
@@ -47,6 +49,7 @@ public class JndiConnectionProvider implements ConnectionProvider
                                 final String username,
                                 final String password)
   {
+    this();
     this.connectionPath = connectionPath;
     this.username = username;
     this.password = password;
@@ -191,4 +194,12 @@ public class JndiConnectionProvider implements ConnectionProvider
     result = 31 * result + (password != null ? password.hashCode() : 0);
     return result;
   }
+
+  private void readObject(final ObjectInputStream stream)
+      throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+    dataSourceService = ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceService.class);
+  }
+
 }

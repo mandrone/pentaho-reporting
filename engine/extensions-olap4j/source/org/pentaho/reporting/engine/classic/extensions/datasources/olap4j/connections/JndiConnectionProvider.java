@@ -17,6 +17,8 @@
 
 package org.pentaho.reporting.engine.classic.extensions.datasources.olap4j.connections;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import org.pentaho.reporting.engine.classic.core.modules.misc.connections.Dataso
 
 public class JndiConnectionProvider implements OlapConnectionProvider
 {
-  private DataSourceService dataSourceService;
+  private transient DataSourceService dataSourceService;
 
   private static final Log logger = LogFactory.getLog(JndiConnectionProvider.class);
   private String connectionPath;
@@ -187,5 +189,12 @@ public class JndiConnectionProvider implements OlapConnectionProvider
     result = 31 * result + (username != null ? username.hashCode() : 0);
     result = 31 * result + (password != null ? password.hashCode() : 0);
     return result;
+  }
+
+  private void readObject(final ObjectInputStream stream)
+      throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+    dataSourceService = ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceService.class);
   }
 }

@@ -13,4 +13,9 @@ public class EditableDataSourceMgmtServiceTest extends TestCase
   {
     ClassicEngineBoot.getInstance().start();
   }
+
+  public void testNothing()
+  {
+
+  }
 }
