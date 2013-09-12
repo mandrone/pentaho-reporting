@@ -1,5 +1,7 @@
 package org.pentaho.reporting.engine.classic.extensions.datasources.mondrian;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.sql.DataSource;
@@ -11,7 +13,7 @@ import org.pentaho.reporting.engine.classic.core.modules.misc.connections.Dataso
 public class JndiDataSourceProvider implements DataSourceProvider
 {
   private String connectionPath;
-  private DataSourceService dataSourceService;
+  private transient DataSourceService dataSourceService;
 
   public JndiDataSourceProvider(final String connectionPath)
   {
@@ -76,5 +78,12 @@ public class JndiDataSourceProvider implements DataSourceProvider
     list.add(getClass().getName());
     list.add(connectionPath);
     return list;
+  }
+
+  private void readObject(final ObjectInputStream stream)
+      throws IOException, ClassNotFoundException
+  {
+    stream.defaultReadObject();
+    dataSourceService = ClassicEngineBoot.getInstance().getObjectFactory().get(DataSourceService.class);
   }
 }
