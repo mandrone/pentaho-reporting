@@ -1,24 +1,23 @@
-/*
- * This program is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License, version 2.1 as published by the Free Software
- * Foundation.
- *
- * You should have received a copy of the GNU Lesser General Public License along with this
- * program; if not, you can obtain a copy at http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * or from the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- *
- * Copyright (c) 2009 Pentaho Corporation.  All rights reserved.
- */
+/*!
+* This program is free software; you can redistribute it and/or modify it under the
+* terms of the GNU Lesser General Public License, version 2.1 as published by the Free Software
+* Foundation.
+*
+* You should have received a copy of the GNU Lesser General Public License along with this
+* program; if not, you can obtain a copy at http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+* or from the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU Lesser General Public License for more details.
+*
+* Copyright (c) 2002-2013 Pentaho Corporation..  All rights reserved.
+*/
 
 package org.pentaho.reporting.ui.datasources.jdbc.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -38,7 +37,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -50,7 +48,6 @@ import org.pentaho.reporting.libraries.base.util.StringUtils;
 import org.pentaho.reporting.libraries.designtime.swing.BorderlessButton;
 import org.pentaho.reporting.libraries.designtime.swing.LibSwingUtil;
 import org.pentaho.reporting.ui.datasources.jdbc.JdbcDataSourceModule;
-import org.pentaho.reporting.ui.datasources.jdbc.Messages;
 import org.pentaho.reporting.ui.datasources.jdbc.connection.JdbcConnectionDefinition;
 import org.pentaho.ui.xul.XulException;
 
@@ -83,65 +80,24 @@ public abstract class ConnectionPanel extends JPanel
     }
   }
 
-  private static class DataSourceDefinitionListCellRenderer extends DefaultTreeCellRenderer
-  {
-    public Component getTreeCellRendererComponent(final JTree tree,
-                                                  final Object value,
-                                                  final boolean sel,
-                                                  final boolean expanded,
-                                                  final boolean leaf,
-                                                  final int row,
-                                                  final boolean hasFocus)
-    {
-      final JLabel listCellRendererComponent = (JLabel)
-          super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-      if (value instanceof JdbcConnectionDefinition)
-      {
-        final JdbcConnectionDefinition def = (JdbcConnectionDefinition) value;
-        final String jndiName = def.getName();
-        if (!"".equals(jndiName))
-        {
-          listCellRendererComponent.setText(jndiName);
-        }
-        else
-        {
-          listCellRendererComponent.setText(" ");
-        }
-      }
-      else if (ConnectionsTreeModel.MetaNode.ROOT.equals(value))
-      {
-        listCellRendererComponent.setText("ROOT"); // NON-NLS
-      }
-      else if (ConnectionsTreeModel.MetaNode.PRIVATE.equals(value))
-      {
-        listCellRendererComponent.setText(Messages.getString("ConnectionPanel.StoredConnections"));
-      }
-      else if (ConnectionsTreeModel.MetaNode.SHARED.equals(value))
-      {
-        listCellRendererComponent.setText(Messages.getString("ConnectionPanel.SharedConnections"));
-      }
-      return listCellRendererComponent;
-    }
-  }
-
   private class SelectionConnectionUpdateHandler implements PropertyChangeListener
   {
     private SelectionConnectionUpdateHandler()
     {
     }
 
-    public void propertyChange(final PropertyChangeEvent aEvent)
+    public void propertyChange(final PropertyChangeEvent event)
     {
-      final DataSourceDialogModel model = (DataSourceDialogModel) aEvent.getSource();
-      final DefaultComboBoxModel connections = model.getConnections();
-      final JdbcConnectionDefinition connection = (JdbcConnectionDefinition) connections.getSelectedItem();
+      final DataSourceDialogModel dataSourceDialogModel = (DataSourceDialogModel) event.getSource();
+      final DefaultComboBoxModel connections = dataSourceDialogModel.getConnections();
+      final Object connection = connections.getSelectedItem();
       if (connection != null)
       {
-        setSelectedValue(connection);
+        dialogModel.getConnections().setSelectedItem(connection);
       }
       else
       {
-        clearSelection();
+        dialogModel.getConnections().setSelectedItem(null);
       }
     }
   }
@@ -161,37 +117,49 @@ public abstract class ConnectionPanel extends JPanel
         putValue(Action.NAME, bundleSupport.getString("ConnectionPanel.Edit.Name"));
       }
       putValue(Action.SHORT_DESCRIPTION, bundleSupport.getString("ConnectionPanel.Edit.Description"));
-      setEnabled(isEditable());
+      propertyChange(null);
     }
 
     public void propertyChange(final PropertyChangeEvent evt)
     {
-      setEnabled(isEditable());
-    }
-
-    private boolean isEditable()
-    {
-      final JdbcConnectionDefinition selectedValue = getSelectedValue();
-      if (selectedValue == null)
+      JdbcConnectionDefinition con = (JdbcConnectionDefinition) getDialogModel().getConnections().getSelectedItem();
+      if (con == null)
       {
-        return false;
+        setEnabled(false);
       }
-      return !selectedValue.isShared();
+      else
+      {
+        setEnabled(con.isShared() == false);
+      }
     }
 
     public void actionPerformed(final ActionEvent e)
     {
-      final JdbcConnectionDefinition existingConnection = getSelectedValue();
+      final JdbcConnectionDefinition existingConnection = (JdbcConnectionDefinition) dialogModel.getConnections().getSelectedItem();
+      if (existingConnection == null)
+      {
+        return;
+      }
+      if (existingConnection.isShared())
+      {
+        return;
+      }
 
       final DesignTimeContext designTimeContext = getDesignTimeContext();
       try
       {
         final Window parentWindow = LibSwingUtil.getWindowAncestor(ConnectionPanel.this);
         final XulDatabaseDialog connectionDialog = new XulDatabaseDialog(parentWindow, designTimeContext);
-        final JdbcConnectionDefinition connectionDefinition = connectionDialog.performEdit(existingConnection, false);
+        final JdbcConnectionDefinition connectionDefinition =
+            connectionDialog.performEdit(existingConnection, false);
 
         // See if the edit completed...
-        if (connectionDefinition != null)
+        if (connectionDefinition == null)
+        {
+          return;
+        }
+
+        if (existingConnection.isShared() == false)
         {
           // If the name changed, delete it before the update is performed
           if (existingConnection.getName().equals(connectionDefinition.getName()) == false)
@@ -203,7 +171,7 @@ public abstract class ConnectionPanel extends JPanel
           getDialogModel().getConnectionDefinitionManager().updateSourceList(connectionDefinition);
 
           dialogModel.editConnection(existingConnection, connectionDefinition);
-          setSelectedValue(connectionDefinition);
+          dialogModel.getConnections().setSelectedItem(connectionDefinition);
         }
       }
       catch (XulException e1)
@@ -215,9 +183,6 @@ public abstract class ConnectionPanel extends JPanel
 
   private class RemoveDataSourceAction extends AbstractAction implements PropertyChangeListener
   {
-    /**
-     * Defines an <code>Action</code> object with a default description string and default icon.
-     */
     private RemoveDataSourceAction()
     {
       final URL resource = ConnectionPanel.class.getResource("/org/pentaho/reporting/ui/datasources/jdbc/resources/Remove.png");
@@ -230,33 +195,30 @@ public abstract class ConnectionPanel extends JPanel
         putValue(Action.NAME, bundleSupport.getString("ConnectionPanel.Remove.Name"));
       }
       putValue(Action.SHORT_DESCRIPTION, bundleSupport.getString("ConnectionPanel.Remove.Description"));
-      computeEnabled();
+      propertyChange(null);
     }
 
     public void propertyChange(final PropertyChangeEvent evt)
     {
-      computeEnabled();
-    }
-
-    private void computeEnabled()
-    {
-      final JdbcConnectionDefinition selectedValue = getSelectedValue();
-      if (selectedValue != null)
+      JdbcConnectionDefinition con = (JdbcConnectionDefinition) getDialogModel().getConnections().getSelectedItem();
+      if (con == null)
       {
-        if (selectedValue.isShared())
-        {
-          setEnabled(false);
-          return;
-        }
+        setEnabled(false);
       }
-
-      setEnabled(getDialogModel().isConnectionSelected());
+      else
+      {
+        setEnabled(con.isShared() == false);
+      }
     }
 
     public void actionPerformed(final ActionEvent e)
     {
-      final JdbcConnectionDefinition source = getSelectedValue();
-      if (source != null)
+      final JdbcConnectionDefinition source = (JdbcConnectionDefinition) getDialogModel().getConnections().getSelectedItem();
+      if (source == null)
+      {
+        return;
+      }
+      if (source.isShared() == false)
       {
         getDialogModel().getConnectionDefinitionManager().removeSource(source.getName());
         getDialogModel().removeConnection(source);
@@ -297,7 +259,7 @@ public abstract class ConnectionPanel extends JPanel
           if (getDialogModel().getConnectionDefinitionManager().updateSourceList(connectionDefinition) == false)
           {
             getDialogModel().addConnection(connectionDefinition);
-            setSelectedValue(connectionDefinition);
+            getDialogModel().getConnections().setSelectedItem(connectionDefinition);
           }
         }
       }
@@ -338,7 +300,6 @@ public abstract class ConnectionPanel extends JPanel
   private DesignTimeContext designTimeContext;
   private ResourceBundleSupport bundleSupport;
   private boolean securityConfigurationAvailable;
-  private ConnectionsTreeModel connectionsTreeModel;
   private JTree dataSourceList;
 
   public ConnectionPanel(final DataSourceDialogModel aDialogModel,
@@ -355,14 +316,14 @@ public abstract class ConnectionPanel extends JPanel
   {
     setLayout(new BorderLayout());
 
-    connectionsTreeModel = new ConnectionsTreeModel(dialogModel.getConnections());
+    ConnectionsTreeModel connectionsTreeModel = new ConnectionsTreeModel(dialogModel.getConnections());
 
     final DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
     selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     selectionModel.addTreeSelectionListener(new SelectionHandler());
 
     dataSourceList = new JTree(connectionsTreeModel);
-    dataSourceList.setCellRenderer(new DataSourceDefinitionListCellRenderer());
+    dataSourceList.setCellRenderer(new DataSourceDefinitionCellRenderer());
     dataSourceList.setSelectionModel(selectionModel);
     dataSourceList.addTreeSelectionListener(new DataSourceDefinitionListSelectionListener());
     dataSourceList.setVisibleRowCount(10);
@@ -421,38 +382,5 @@ public abstract class ConnectionPanel extends JPanel
   protected ResourceBundleSupport getBundleSupport()
   {
     return bundleSupport;
-  }
-
-  public JdbcConnectionDefinition getSelectedValue()
-  {
-    final TreePath selectionPath = dataSourceList.getSelectionPath();
-    if (selectionPath == null)
-    {
-      return null;
-    }
-    final Object lastPathComponent = selectionPath.getLastPathComponent();
-    if (lastPathComponent instanceof JdbcConnectionDefinition)
-    {
-      return (JdbcConnectionDefinition) lastPathComponent;
-    }
-    return null;
-
-  }
-
-  public void setSelectedValue(final JdbcConnectionDefinition selectedValue)
-  {
-    if (selectedValue == null)
-    {
-      dataSourceList.clearSelection();
-      return;
-    }
-
-    final TreePath path = connectionsTreeModel.getPath(selectedValue);
-    dataSourceList.setSelectionPath(path);
-  }
-
-  public void clearSelection()
-  {
-    dataSourceList.clearSelection();
   }
 }
